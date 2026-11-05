@@ -1,0 +1,10 @@
+*
+!*/
+!*.lua
+!*.sh
+!*.py
+!.gitignore
+
+*.bak
+*.old
+*.swp
