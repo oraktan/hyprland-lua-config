@@ -84,7 +84,6 @@ end, "Pencere Değiştir (Alt+Tab)")
 for i = 1, 10 do
     local key = tostring(i % 10)
     bind(key, hl.dsp.focus({ workspace = i}), "Workspace " .. i)
-    bind("SHIFT + " .. key, hl.dsp.window.move({ workspace = i }), "Pencereyi Taşı WS " .. i)
     bind(mainMod .. " + CTRL + " .. key, hl.dsp.window.move({workspace = i, follow = false}), "Sessiz Taşı WS " .. i)
     bind(mainMod .. " + F" .. i, hl.dsp.window.move({workspace = i}), "F Tuşu İle Taşı WS " .. i)
 end
@@ -108,7 +107,6 @@ for i, keys in ipairs(numpad) do
     local ws = (i == 10) and 10 or i
     for _, k in ipairs(keys) do
         bind(k, hl.dsp.focus({workspace = ws}), "Numpad WS " .. ws)
-        bind("SHIFT + " .. k, hl.dsp.window.move({workspace = ws}), "Numpad Taşı WS " .. ws)
     end
 end
 
