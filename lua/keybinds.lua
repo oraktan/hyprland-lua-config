@@ -74,34 +74,62 @@ bind("ALT + Tab", function()
 end, "Pencere Değiştir (Alt+Tab)")
 
 -- 3. WORKSPACE (ÇALIŞMA ALANI) YÖNETİMİ
--- Rakamlar ile Geçiş (1-0) (Yazı yazmayı bozmaz, SUPER tuşu şart)
+
+-- SUPER + 1-9 / SUPER + 0: Masaüstüne geç
+-- SUPER + F1-F10: Pencereyi masaüstüne taşı
 for i = 1, 10 do
     local key = tostring(i % 10)
-    bind(mainMod .. " + " .. key, hl.dsp.focus({ workspace = i}), "Workspace " .. i)
-    bind(mainMod .. " + SHIFT + " .. key, hl.dsp.window.move({ workspace = i }), "Pencereyi Taşı WS " .. i)
-    bind(mainMod .. " + CTRL + " .. key, hl.dsp.window.move({workspace = i, follow = false}), "Sessiz Taşı WS " .. i)
-    bind(mainMod .. " + F" .. i, hl.dsp.window.move({workspace = i}), "F Tuşu İle Taşı WS " .. i)
+
+    bind(mainMod .. " + " .. key,
+        hl.dsp.focus({workspace = i}),
+        "Workspace " .. i)
+
+    bind(mainMod .. " + SHIFT + " .. key,
+        hl.dsp.window.move({workspace = i}),
+        "Pencereyi Taşı WS " .. i)
+
+    bind(mainMod .. " + CTRL + " .. key,
+        hl.dsp.window.move({workspace = i, follow = false}),
+        "Sessiz Taşı WS " .. i)
+
+    bind(mainMod .. " + F" .. i,
+        hl.dsp.window.move({workspace = i}),
+        "F Tuşu İle Taşı WS " .. i)
 end
 
-bind(mainMod .. " + mouse_down", hl.dsp.focus({ workspace = "e+1" }), "Sonraki Workspace (Fare)")
-bind(mainMod .. " + mouse_up",   hl.dsp.focus({ workspace = "e-1" }), "Önceki Workspace (Fare)")
-bind("CTRL + ALT + right", hl.dsp.focus({workspace = "e+1"}), "Sonraki Workspace")
-bind("CTRL + ALT + left", hl.dsp.focus({workspace = "e-1"}), "Önceki Workspace")
-bind(mainMod .. " + comma", hl.dsp.focus({workspace = "e-1"}), "Önceki Workspace (,)")
-bind("F1", hl.dsp.focus({workspace = "previous"}), "Önceki Çalışma Alanı")
+bind(mainMod .. " + mouse_down",
+    hl.dsp.focus({workspace = "e+1"}), "Sonraki Workspace (Fare)")
+bind(mainMod .. " + mouse_up",
+    hl.dsp.focus({workspace = "e-1"}), "Önceki Workspace (Fare)")
+bind("CTRL + ALT + right",
+    hl.dsp.focus({workspace = "e+1"}), "Sonraki Workspace")
+bind("CTRL + ALT + left",
+    hl.dsp.focus({workspace = "e-1"}), "Önceki Workspace")
+bind(mainMod .. " + comma",
+    hl.dsp.focus({workspace = "e-1"}), "Önceki Workspace (,)")
+bind("F1",
+    hl.dsp.focus({workspace = "previous"}), "Önceki Çalışma Alanı")
 
--- Numpad Geçişleri (SUPER Zorunlu, Yazı Yazmayı Bozmaz)
+-- NUMPAD: SUPER olmadan masaüstüne geç
+-- Num Lock açık ve kapalı tuş adları
 local numpad = {
-    {"KP_1","KP_End"},   {"KP_2","KP_Down"}, {"KP_3","KP_Next"},
-    {"KP_4","KP_Left"},  {"KP_5","KP_Begin"},{"KP_6","KP_Right"},
-    {"KP_7","KP_Home"},  {"KP_8","KP_Up"},   {"KP_9","KP_Prior"},
-    {"KP_0","KP_Insert"}
+    {"KP_1", "KP_End"},
+    {"KP_2", "KP_Down"},
+    {"KP_3", "KP_Next"},
+    {"KP_4", "KP_Left"},
+    {"KP_5", "KP_Begin"},
+    {"KP_6", "KP_Right"},
+    {"KP_7", "KP_Home"},
+    {"KP_8", "KP_Up"},
+    {"KP_9", "KP_Prior"},
+    {"KP_0", "KP_Insert"}
 }
+
 for i, keys in ipairs(numpad) do
-    local ws = (i == 10) and 10 or i
-    for _, k in ipairs(keys) do
-        bind(mainMod .. " + " .. k, hl.dsp.focus({workspace = ws}), "Numpad WS " .. ws)
-        bind(mainMod .. " + SHIFT + " .. k, hl.dsp.window.move({workspace = ws}), "Numpad Taşı WS " .. ws)
+    for _, key in ipairs(keys) do
+        bind(key,
+            hl.dsp.focus({workspace = i}),
+            "Numpad Workspace " .. i)
     end
 end
 

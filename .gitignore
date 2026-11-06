@@ -8,3 +8,11 @@
 *.bak
 *.old
 *.swp
+
+# Local backups
+*.backup-*
+*.bak
+*.orig
+*~
+__pycache__/
+*.pyc
