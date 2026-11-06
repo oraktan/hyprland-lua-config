@@ -106,7 +106,6 @@ local numpad = {
 for i, keys in ipairs(numpad) do
     local ws = (i == 10) and 10 or i
     for _, k in ipairs(keys) do
-        bind(k, hl.dsp.focus({workspace = ws}), "Numpad WS " .. ws)
     end
 end
 
