@@ -169,7 +169,7 @@ script("CTRL + ALT + P", "Wlogout.sh", nil, "Güç Menüsü")
 run(mainMod .. " + SHIFT + N", "swaync-client -t -sw", "Bildirim Merkezi")
 script(mainMod .. " + SHIFT + E", "Kool_Quick_Settings.sh", nil, "Hızlı Ayarlar")
 
-script(mainMod .. " + V", "RofiCopyHist.sh", nil, "Pano Geçmişi")
+script(mainMod .. " + V", "hist.sh", nil, "Pano Geçmişi")
 script(mainMod .. " + C", "RofiCalc.sh", nil, "Hesap Makinesi")
 script(mainMod .. " + period", "RofiEmoji.sh", nil, "Emoji Menüsü")
 script(mainMod .. " + SHIFT + M", "RofiBeats.sh", nil, "Müzik Menüsü")
@@ -182,6 +182,8 @@ run(mainMod .. " + ALT + V", scripts .. "dict.sh", "Sözlük")
 run("MOD5 + F1", fileManager .. " \"$HOME/Downloads\"", "İndirilenler")
 run("MOD5 + F2", fileManager .. " \"$HOME/Documents\"", "Belgeler")
 
+run("CTRL + ALT + 6", "thunderbird -P taner", "Thunderbird Taner Profili")
+
 script("Print", "ScreenShot2.sh", "--swappy", "Swappy Ekran Görüntüsü")
 script(mainMod .. " + Print", "ScreenShot.sh", "--area", "Bölge Ekran Görüntüsü")
 script(mainMod .. " + CTRL + Print", "ScreenShot.sh", "--in5", "5 Saniye Gecikmeli Görüntü")
@@ -189,6 +191,7 @@ script(mainMod .. " + CTRL + SHIFT + Print", "ScreenShot.sh", "--in10", "10 Sani
 script("ALT + Print", "ScreenShot.sh", "--active", "Aktif Pencere Görüntüsü")
 script(mainMod .. " + SHIFT + S", "ScreenShot.sh", "--swappy", "Swappy Düzenleyici")
 run(mainMod .. " + R", scripts .. "record.sh", "Ekran Kaydı")
+run("Insert", "kwrite ~/notlar.txt", "Whatsapp Paylaş")
 
 local ui_scripts = {
     {"SUPER + ALT + R","Refresh.sh","Waybar Yenile"},
