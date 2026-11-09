@@ -210,4 +210,18 @@ local ui_scripts = {
     {"SUPER + SHIFT + O","ZshChangeTheme.sh","Zsh Teması"}
 }
 for _, item in ipairs(ui_scripts) do script(item[1], item[2], item[4], item[3]) end
-run(mainMod .. " + CTRL + ALT + B", "pkill -SIGUSR1 waybar", "Waybar Göster/Gizle")
+-- 6. SİSTEM, ROFI SCRIPTLERI & EKRAN GÖRÜNTÜSÜ
+---- SUPER + L: Ekranı kilitle
+hl.bind("SUPER + L",
+    hl.dsp.exec_cmd("pidof hyprlock || hyprlock"),
+    { description = "Ekranı Kilitle" }
+)
+
+-- ALT + F4: Uyku moduna al
+run(
+    "ALT + F4",
+    "systemctl suspend",
+    "Uyku Moduna Al"
+)
+
+-- ALT + F4: Önce ekranı kilitle, sonra uykuya geç
