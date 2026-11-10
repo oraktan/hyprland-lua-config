@@ -4,7 +4,7 @@
 -- Environment
 hl.env("XCURSOR_SIZE", "24")
 hl.env("HYPRCURSOR_SIZE", "24")
-
+hl.env("HYPRLAND_NO_RT", "1")
 -- Display and input
 require("lua.monitors")
 require("lua.input")

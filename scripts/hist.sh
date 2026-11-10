@@ -42,10 +42,21 @@ delete_snippet() {
         }' "$SNIP_FILE" > "$SNIP_FILE.tmp" && mv "$SNIP_FILE.tmp" "$SNIP_FILE"
 }
 
+# Metni tek satıra kodla: \ -> \\ ve satır sonu -> \n (pin ve snippet için)
+encode_line() {
+    sed ':a;N;$!ba;s/\\/\\\\/g;s/\n/\\n/g'
+}
+
+# Pin sil (grep boş sonuçta 1 döndürdüğü için && kullanmıyoruz)
+remove_pin() {
+    grep -Fxv -- "$1" "$PIN_FILE" > "$PIN_FILE.tmp"
+    mv "$PIN_FILE.tmp" "$PIN_FILE"
+}
+
 get_text() {
     case "$item_type" in
         snippet) expand_snippet "$clean_item" ;;
-        pin)     printf '%s' "$clean_item" ;;
+        pin)     printf '%b' "$clean_item" ;;
         *)       echo "$clean_item" | cliphist decode ;;
     esac
 }
@@ -68,16 +79,19 @@ if [ "$MODE" = "snip" ]; then
     PROMPT="󰌌 Snippet"
     MESG="Enter/Tık: Yapıştır | 1-9: Hızlı Seç | Alt+s: Telefona | Alt+d: Sil | Alt+t: Pano geçmişi"
 else
-    PINNED=$(sed 's/^/󰐃 [PİN] /' "$PIN_FILE")
+    PINNED=$(grep -v '^$' "$PIN_FILE" | sed 's/^/󰐃 [PİN] /')
     HISTORY_LIST=$(cliphist list)
     HISTORY_WITH_NUMS=$(echo "$HISTORY_LIST" | nl -w1 -s'. ')
     MENU_OPTIONS=$(
         [ -n "$PINNED" ] && echo "$PINNED"
-        [ -n "$HISTORY_WITH_NUMS" ] && echo "$HISTORY_WITH_NUMS"
+        [ -n "$HISTORY_LIST" ] && echo "$HISTORY_WITH_NUMS"
         echo "$WIPE_LABEL"
     )
     PROMPT="📋 Clipboard"
     MESG="Alt+p: Pin | Alt+d: Sil | Alt+s: Telefona | Alt+n: Snippet yap | Alt+t: Snippet'ler | 1-9: Hızlı Seç"
+    if [ -z "$HISTORY_LIST" ]; then
+        MESG="⚠ Geçmiş boş: 'wl-paste --watch cliphist store' çalışmıyor olabilir | $MESG"
+    fi
 fi
 
 # --- MOUSE ORTALA ---
@@ -140,6 +154,9 @@ if [ "$EXIT_CODE" -ge 12 ] && [ "$EXIT_CODE" -le 20 ]; then
     fi
 fi
 
+# Seçim boşsa (ör. o numarada öğe yoksa) çık
+[ -z "$selected" ] && exit
+
 # Snippet modunda satır numarasını temizle
 [ "$MODE" = "snip" ] && selected=$(echo "$selected" | strip_num)
 
@@ -174,17 +191,31 @@ esac
 
 # --- PIN TOGGLE (Alt+p) ---
 if [ "$EXIT_CODE" -eq 10 ]; then
-    if [ "$item_type" = "snippet" ]; then
-        notify-send "Clipboard" "Snippet zaten kalıcı"
-        exit
-    fi
-    if grep -Fxq "$clean_item" "$PIN_FILE"; then
-        grep -Fxv "$clean_item" "$PIN_FILE" > "$PIN_FILE.tmp" && mv "$PIN_FILE.tmp" "$PIN_FILE"
-        notify-send "Clipboard" "Pin kaldırıldı"
-    else
-        echo "$clean_item" >> "$PIN_FILE"
-        notify-send "Clipboard" "Pinlendi"
-    fi
+    case "$item_type" in
+        snippet)
+            notify-send "Clipboard" "Snippet zaten kalıcı"
+            ;;
+        pin)
+            remove_pin "$clean_item"
+            notify-send "Clipboard" "Pin kaldırıldı"
+            ;;
+        *)
+            if echo "$clean_item" | grep -q "binary data"; then
+                notify-send "Clipboard" "Görseller pinlenemez"
+                exit
+            fi
+            # Çözülmüş gerçek metni tek satıra kodlayıp sakla
+            pin_line=$(get_text | encode_line)
+            [ -z "$pin_line" ] && exit
+            if grep -Fxq -- "$pin_line" "$PIN_FILE"; then
+                remove_pin "$pin_line"
+                notify-send "Clipboard" "Pin kaldırıldı"
+            else
+                echo "$pin_line" >> "$PIN_FILE"
+                notify-send "Clipboard" "Pinlendi"
+            fi
+            ;;
+    esac
     exit
 fi
 
@@ -194,7 +225,7 @@ if [ "$EXIT_CODE" -eq 11 ]; then
         delete_snippet "$clean_item"
         notify-send "Clipboard" "Snippet silindi: $clean_item"
     elif [ "$item_type" = "pin" ]; then
-        grep -Fxv "$clean_item" "$PIN_FILE" > "$PIN_FILE.tmp" && mv "$PIN_FILE.tmp" "$PIN_FILE"
+        remove_pin "$clean_item"
         notify-send "Clipboard" "Pin silindi"
     else
         echo "$clean_item" | cliphist delete
@@ -258,7 +289,7 @@ if [ "$EXIT_CODE" -eq 22 ]; then
     key=${key//:/}
     [ -z "$key" ] && exit
 
-    value=$(printf '%s' "$text" | sed ':a;N;$!ba;s/\\/\\\\/g;s/\n/\\n/g')
+    value=$(printf '%s' "$text" | encode_line)
 
     delete_snippet "$key"
     echo "$key: $value" >> "$SNIP_FILE"
@@ -268,13 +299,29 @@ if [ "$EXIT_CODE" -eq 22 ]; then
 fi
 
 # --- COPY & PASTE ---
-text=$(get_text)
-
-if [ "$item_type" = "snippet" ]; then
-    printf '%s' "$text" | wl-copy --sensitive 2>/dev/null || printf '%s' "$text" | wl-copy
-else
-    printf '%s' "$text" | wl-copy
-fi
+case "$item_type" in
+    history)
+        # Doğrudan boru: görseller ve satır sonları bozulmaz
+        echo "$clean_item" | cliphist decode | wl-copy
+        ;;
+    snippet)
+        text=$(get_text)
+        printf '%s' "$text" | wl-copy --sensitive 2>/dev/null || printf '%s' "$text" | wl-copy
+        ;;
+    pin)
+        get_text | wl-copy
+        ;;
+esac
 
 sleep 0.2
-wtype -M ctrl v -m ctrl
+
+# Terminallerde yapıştırma Ctrl+Shift+V'dir
+class=$(hyprctl activewindow -j 2>/dev/null | jq -r '.class // ""')
+case "$class" in
+    *kitty*|*ghostty*|*foot*|*[Aa]lacritty*|*wezterm*)
+        wtype -M ctrl -M shift v -m shift -m ctrl
+        ;;
+    *)
+        wtype -M ctrl v -m ctrl
+        ;;
+esac

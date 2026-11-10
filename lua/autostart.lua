@@ -1,9 +1,18 @@
 -- Hyprland 0.57 - Autostart (Başlangıç Uygulamaları)
+hl.on("hyprland.start", function()
+    hl.exec_cmd("waybar")
+    hl.exec_cmd("nm-applet --indicator")
+    hl.exec_cmd("blueman-applet")
 
-hl.config({
-    exec_once = {
-        "waybar",
-        "nm-applet --indicator",
-        "blueman-applet"
-    }
-})
+  -- Firefox profilleri (windowrules.lua bunları 1-4. workspace'lere yerleştiriyor)
+    hl.exec_cmd("firefox -P taner --new-instance")
+    hl.exec_cmd("firefox -P work --new-instance")
+    hl.exec_cmd("firefox -P whatsapp --new-instance")
+    hl.exec_cmd("firefox -P info --new-instance")
+    -- Pano geçmişi (rofi clipboard menüsü bunu okur)
+    hl.exec_cmd("wl-paste --type text --watch cliphist store")
+    hl.exec_cmd("wl-paste --type image --watch cliphist store")
+    -- Thunderbird profilleri
+    hl.exec_cmd("thunderbird -P taner --new-instance")
+    hl.exec_cmd("thunderbird -P work --new-instance")
+end)
